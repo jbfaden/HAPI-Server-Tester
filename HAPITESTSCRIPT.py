@@ -36,7 +36,9 @@ from hapiplot import hapiplot
 
 #declaring variables and defining functions
 
-finalLog = []
+finalLog = ['**********************************', 'RESULTS:']
+
+exceptLog = ['**********************************', 'ERRORS:']
 
 servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://cdaweb.gsfc.nasa.gov/hapi',
@@ -121,29 +123,30 @@ def hapiTest(cHS):
         serverResponse = urlopen(catalogURL)
         DataSetList = json.loads(serverResponse.read())
         refinedList = DataSetList.get('catalog') #just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom. 
-        
-        #get HAPI version for later use
+            
+            #get HAPI version for later use
         hapiVer = DataSetList.get('HAPI')
-        
+            
         print(hapiVer)
-        
-        
-        #this actually returns a python list of python dictionaries... hence the .get of the key "id"
-        #down below to get its value
             
             
+            #this actually returns a python list of python dictionaries... hence the .get of the key "id"
+            #down below to get its value
+                
+                
         idList = []
         for i in range(len(refinedList)):
             idList.append(refinedList[i].get('id')) #so far only AMDA and planet physics works?
-                
-                
+                    
+                    
         print(idList[0])
         print(idList[-1])
         print(len(refinedList))
         
-    except:
-        #sys.exit('Could not load dataset IDs.')
-        print('placeholder error')
+    except Exception as e:
+        
+        exceptLog.append(e + " occured on " + cHS + "  process: getting dataset IDs")
+        
         
     #get a random dataset ID to choose time/params from the info
     randID = random.choice(idList)
@@ -176,9 +179,10 @@ def hapiTest(cHS):
         print(pList[-1])
         print(len(refinedList))
         
-    except:
-        #sys.exit('Could not load parameter names.')
-        print('placeholder error')
+    except Exception as e:
+       
+        exceptLog.append(e + " occured on " + cHS + "  process: getting parameters")
+        
         
         
         
@@ -231,9 +235,9 @@ def hapiTest(cHS):
     
         print(str(startDate) + '\n' +  str(testDate))
     
-    except:
-        #sys.exit('Could not load start/stop dates. ')
-        print('placeholder error')
+    except Exception as e:
+        
+        exceptLog.append(e + " occured on " + cHS + " process:  getting timestamps")
         
         
     #using the start and stop date, select a random start and stop date within the timeframe for use in sampling(using a pandas dataframe method I stole from stackoverflow)
@@ -290,8 +294,10 @@ def hapiTest(cHS):
             serverResponse = urlopen(finalURL)#, cafile='/Users/palacst1/Desktop/finalPemCert.pem')
             DataSetList = csv.reader(serverResponse)
             
-        except:
-            print("failed to load CSV")
+        except Exception as e:
+           
+           exceptLog.append(e + " occured on " + cHS + " process:  loading CSV")
+            
     
         server     = cHS
         dataset    = randID
@@ -316,7 +322,13 @@ def hapiTest(cHS):
         print(f"{tColors.success}Success!!!!!{tColors.endC}" + " Time: " + str(round((end_time - start_time), 3)) + " seconds")
             #sys.exit(0)
 
-    except:
+    except Exception as e:
+       
+        exceptLog.append(str(e) + " occured on " + cHS + " process:  plotting data")
+        
+        
+        
+        
         print(f"{tColors.fail}HAPI failed to plot on {tColors.endC}" + str(cHS))
         finalLog.append(cHS + '--ERROR')
     #sys.exit('CSV PARSE FAILED! COULD NOT PARSE CSV with python.csv')
@@ -357,11 +369,17 @@ def main():
     for o in finalLog:
         
         print(o)
+        
+    
     
     test_end_time = time.perf_counter ()
     
     print("Total Test Time: " + str(round((test_end_time - test_start_time), 3)) + " seconds")
     
+    #print all exceptions that occured for debugging purposes:
+    
+    for j in exceptLog:
+        print(j)
 main()
     
     
@@ -376,7 +394,16 @@ main()
 
     
 
-    
+"""
+ERRORS SO FAR:
+    1. Some parameter data are strings... like vectorstr on HAPITEST2
+    2. Certain parameters have no data for the current 15 minute time sample- implement a dynamic way around this
+    3. Certain servers have non-standard data organization
+    4. some servers have no data for like the last 8 hours of listed date.. but as soon as you get to its start you are met with GBs of data- hard to navigate the 222 function as some servers measure by milliseconds, others daily. lol
+
+
+4. MIGHT not get the first parameter of time: (1.1 it is "time", 2.0 it is "Time", 3.0 it is "Timestamp")
+"""
     
     
 
