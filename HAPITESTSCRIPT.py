@@ -145,10 +145,11 @@ def hapiTest(cHS):
         
     except Exception as e:
         
-        exceptLog.append(e + " occured on " + cHS + "  process: getting dataset IDs")
+        exceptLog.append(str(e) + " occured on " + cHS + "  process: getting dataset IDs")
         
         
     #get a random dataset ID to choose time/params from the info
+    
     randID = random.choice(idList)
     print(randID)
     infoURL = cHS
@@ -181,13 +182,14 @@ def hapiTest(cHS):
         
     except Exception as e:
        
-        exceptLog.append(e + " occured on " + cHS + "  process: getting parameters")
+        exceptLog.append(str(e) + " occured on " + cHS + "  process: getting parameters")
         
         
         
         
         
     #get a random parameter
+    del pList[0] #gets rid of time(no need to plot time)
     randPara = random.choice(pList)
     print(randPara)
     
@@ -237,7 +239,7 @@ def hapiTest(cHS):
     
     except Exception as e:
         
-        exceptLog.append(e + " occured on " + cHS + " process:  getting timestamps")
+        exceptLog.append(str(e) + " occured on " + cHS + " process:  getting timestamps")
         
         
     #using the start and stop date, select a random start and stop date within the timeframe for use in sampling(using a pandas dataframe method I stole from stackoverflow)
@@ -266,19 +268,72 @@ def hapiTest(cHS):
     
     
     #create the final random link- with a special case for 2.0 vs 3.0- & only to get CSVs!
+    dataEmpty = True #boolean for getting new urls until data has populated 
+    testInterval = 60
+    increaser = 4
+    try:
+        
+        while dataEmpty:
+                    
+            if hapiVer == '3.0':
+                        
+                    
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + testStartDate + '&stop=' + testStopDate + '&format=csv' #'&include=header'
+                    
+                print(finalURL)
+                        
+            if hapiVer == '2.0' or hapiVer == '1.1':
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + testStartDate + '&time.max=' + testStopDate + '&format=csv' #'&include=header'
+                    
+                print(finalURL)
+            
+            #load csv file from finalURL
+            try:
+                
+                csvResponse = pd.read_csv(finalURL)
+            except:
+                print("bruh")
+                csvResponse = []
+                
+
+            
+            dataRows = list(csvResponse) #this creates a measurebale length list from the _csv.reader object
+            
+            
+            if len(dataRows) < 1:
+                
+                print(f"{tColors.fail}No data found... increasing time range{tColors.endC}")
+                
+                
+                
+                
+                testDate = stopDate - timedelta(minutes = testInterval)
+                
+                testStartDate = testDate.isoformat() + 'Z'
+                
+                
+                
+                if testInterval == 3840: #64 hours in mins, if it reaches this point go straight to collecting a years worth of data
+                    increaser = 300
+                
+                #increase the time range by 4x each time, until data is found, if not the exception will catch an out of bounds HAPI error, most likely meaning empty data. 15 mins, 1 hr, 4hr, 16hr, 64hr
+                testInterval *= increaser
+                
+                
+                
+                
+                
+            else:
+                print(f"{tColors.success}Found Data! On to the plot!{tColors.endC}")
+                dataEmpty = False
+                
+                   
+    except Exception as e:
+        exceptLog.append(str(e) + " occured on " + cHS + " process:  loading CSV. Likely empty dataset")
+        print(str(e))
     
-    
-    if hapiVer == '3.0':
         
     
-        finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + testStartDate + '&stop=' + testStopDate + '&format=csv&include=header'
-    
-        print(finalURL)
-        
-    if hapiVer == '2.0' or hapiVer == '1.1':
-        finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + testStartDate + '&time.max=' + testStopDate + '&format=csv&include=header'
-    
-        print(finalURL)
         
     
     
@@ -289,14 +344,7 @@ def hapiTest(cHS):
         
     try:
             
-        try:
-                
-            serverResponse = urlopen(finalURL)#, cafile='/Users/palacst1/Desktop/finalPemCert.pem')
-            DataSetList = csv.reader(serverResponse)
-            
-        except Exception as e:
-           
-           exceptLog.append(e + " occured on " + cHS + " process:  loading CSV")
+        
             
     
         server     = cHS
@@ -401,6 +449,7 @@ ERRORS SO FAR:
     3. Certain servers have non-standard data organization
     4. some servers have no data for like the last 8 hours of listed date.. but as soon as you get to its start you are met with GBs of data- hard to navigate the 222 function as some servers measure by milliseconds, others daily. lol
 
+straight up missing datasets on iswa: RBSP_B_RBSPICE_part_P1M
 
 4. MIGHT not get the first parameter of time: (1.1 it is "time", 2.0 it is "Time", 3.0 it is "Timestamp")
 """
