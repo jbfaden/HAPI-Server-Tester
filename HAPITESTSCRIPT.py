@@ -43,7 +43,7 @@ exceptLog = ['**********************************', 'ERRORS:']
 servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://cdaweb.gsfc.nasa.gov/hapi',
  'http://planet.physics.uiowa.edu/das/das2Server/hapi', #works very rarely, website is messed up
- 'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
+ #'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
  'http://lasp.colorado.edu/lisird/hapi',
  'http://hapi-server.org/servers/TestData2.0/hapi',
  'http://amda.irap.omp.eu/service/hapi', 
@@ -292,7 +292,7 @@ def hapiTest(cHS):
                 
                 csvResponse = pd.read_csv(finalURL)
             except:
-                print("bruh")
+                
                 csvResponse = []
                 
 
@@ -450,7 +450,8 @@ ERRORS SO FAR:
     4. some servers have no data for like the last 8 hours of listed date.. but as soon as you get to its start you are met with GBs of data- hard to navigate the 222 function as some servers measure by milliseconds, others daily. lol
 
 straight up missing datasets on iswa: RBSP_B_RBSPICE_part_P1M
-
+ISWA IS DOWN LOL
+https://cdaweb.gsfc.nasa.gov/hapi/data?id=THA_L2_FBK@11&parameters=tha_fb_scm2&time.min=2022-08-15T23:44:59Z&time.max=2022-08-15T23:59:59Z&format=csv gives a header without requesting it????
 4. MIGHT not get the first parameter of time: (1.1 it is "time", 2.0 it is "Time", 3.0 it is "Timestamp")
 """
     
