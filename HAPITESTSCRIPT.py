@@ -11,6 +11,7 @@ from datetime import timedelta
 import ssl
 import certifi
 
+
 import time
 
 import csv
@@ -21,8 +22,13 @@ from hapiclient import hapi
 
 from hapiplot import hapiplot
 
-#avoid ssl veri
-#ssl._create_default_https_context = ssl._create_unverified_context
+# set up special matplotlib plotting requirements
+
+
+
+
+
+
 
 
 
@@ -42,8 +48,8 @@ exceptLog = ['**********************************', 'ERRORS:']
 
 servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://cdaweb.gsfc.nasa.gov/hapi',
- 'http://planet.physics.uiowa.edu/das/das2Server/hapi', #works very rarely, website is messed up
- #'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
+ 'http://planet.physics.uiowa.edu/das/das2Server/hapi', 
+ 'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
  'http://lasp.colorado.edu/lisird/hapi',
  'http://hapi-server.org/servers/TestData2.0/hapi',
  'http://amda.irap.omp.eu/service/hapi', 
@@ -67,7 +73,7 @@ def testHTTPCode(cS):
         
     else:
         print(f"{tColors.fail}ERRROR, BAD HTTP response status code: {tColors.endC}" + "[" + str(x.status_code) + "]")
-        #sys.exit("Expected 200 response code, got HTTP response status code of " + str(x.status_code) + "...TERMINATE PROCESS")
+        
 
 
     
@@ -136,7 +142,7 @@ def hapiTest(cHS):
                 
         idList = []
         for i in range(len(refinedList)):
-            idList.append(refinedList[i].get('id')) #so far only AMDA and planet physics works?
+            idList.append(refinedList[i].get('id')) 
                     
                     
         print(idList[0])
@@ -173,7 +179,7 @@ def hapiTest(cHS):
             
         pList = []
         for i in range(len(refinedList)):
-            pList.append(refinedList[i].get('name')) #so far only AMDA and planet physics works?
+            pList.append(refinedList[i].get('name')) 
                 
                 
         print(pList[0])
@@ -195,7 +201,7 @@ def hapiTest(cHS):
     
     #search for the startDate and stopDate within a random dataset. 
     try:
-        serverResponse = urlopen(infoURL)#, cafile='/Users/palacst1/Desktop/finalPemCert.pem')
+        serverResponse = urlopen(infoURL)
         infoList = json.loads(serverResponse.read())
         startDate = infoList.get('startDate')
         stopDate = infoList.get('stopDate')
@@ -231,7 +237,7 @@ def hapiTest(cHS):
             stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%dT%H:%M:%SZ")
             
         
-        #generate a test "start date" one hour before the dataset stopdate, to check if the latest data is all good/parseable (therefore the rest of the data should be ok.)
+        #generate a test "start date" 15 mins before the dataset stopdate, to check if the latest data is all good/parseable (therefore the rest of the data should be ok.) well, maybe...
         k = 15
         testDate = stopDate - timedelta(minutes = k)
     
@@ -242,7 +248,7 @@ def hapiTest(cHS):
         exceptLog.append(str(e) + " occured on " + cHS + " process:  getting timestamps")
         
         
-    #using the start and stop date, select a random start and stop date within the timeframe for use in sampling(using a pandas dataframe method I stole from stackoverflow)
+    #using the start and stop date, select a random start and stop date within the timeframe for use in sampling (pd dataframe)
     
     
     
@@ -379,19 +385,15 @@ def hapiTest(cHS):
         
         print(f"{tColors.fail}HAPI failed to plot on {tColors.endC}" + str(cHS))
         finalLog.append(cHS + '--ERROR')
-    #sys.exit('CSV PARSE FAILED! COULD NOT PARSE CSV with python.csv')
-    #return status code? (stdout?)
-    #0 is failure, 1 is success  - talk to Jeremy
+  
 
 
 #final notes: some sites have UTC Zulu as :XXX, some have it as .XXX
 #also hapi 2.0 uses time.min and time.max to stream data...
-#I get 50% success rate on Vires as they have both .Z and :Z 
-#might wanna only request CSVs as not all servers have json response capability
-#hopkins network is blocking from certain sites in Firefox 
 
 
-#Test works on... Servers with microsecond and second time format.. Others to be fixed
+
+
 """
   #  http://hapi-server.org/servers/SSCWeb/hapi Yes
    # http://datashop.elasticbeanstalk.com/hapi - SERVER DOWN
@@ -443,16 +445,16 @@ main()
     
 
 """
-ERRORS SO FAR:
+ERRORS/ISSUES SO FAR:
     1. Some parameter data are strings... like vectorstr on HAPITEST2
-    2. Certain parameters have no data for the current 15 minute time sample- implement a dynamic way around this
+    2. Certain parameters have no data for the current 15 minute time sample- implement a dynamic way around this- DONE
     3. Certain servers have non-standard data organization
-    4. some servers have no data for like the last 8 hours of listed date.. but as soon as you get to its start you are met with GBs of data- hard to navigate the 222 function as some servers measure by milliseconds, others daily. lol
+    4. some servers have no data for the last 8 hours of listed date.. but as soon as you get to its start you are met with LOTS of data- some servers measure by milliseconds, others daily. lol
 
-straight up missing datasets on iswa: RBSP_B_RBSPICE_part_P1M
-ISWA IS DOWN LOL
-https://cdaweb.gsfc.nasa.gov/hapi/data?id=THA_L2_FBK@11&parameters=tha_fb_scm2&time.min=2022-08-15T23:44:59Z&time.max=2022-08-15T23:59:59Z&format=csv gives a header without requesting it????
-4. MIGHT not get the first parameter of time: (1.1 it is "time", 2.0 it is "Time", 3.0 it is "Timestamp")
+missing datasets on iswa: RBSP_B_RBSPICE_part_P1M
+
+
+
 """
     
     
