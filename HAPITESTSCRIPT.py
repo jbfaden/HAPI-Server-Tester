@@ -310,7 +310,8 @@ def hapiTest(cHS):
                 
                 print(f"{tColors.fail}No data found... increasing time range{tColors.endC}")
                 
-                
+                #1 second delay between requests- to not overwhelm servers
+                time.sleep(1)
                 
                 
                 testDate = stopDate - timedelta(minutes = testInterval)
@@ -373,7 +374,7 @@ def hapiTest(cHS):
         end_time = time.perf_counter ()
             
         finalLog.append(cHS + ' plotted successfully.')
-        print(f"{tColors.success}Success!!!!!{tColors.endC}" + " Time: " + str(round((end_time - start_time), 3)) + " seconds")
+        print(f"{tColors.success}Success!!!!!{tColors.endC}" + " Time: " + str(round((end_time - start_time), 3)) + " seconds") 
             #sys.exit(0)
 
     except Exception as e:
