@@ -217,9 +217,13 @@ def hapiTest(cHS):
             
         elif cHS == "http://planet.physics.uiowa.edu/das/das2Server/hapi": #special case or Das2 server
             
-            if randID == 'Cassini/Ephemeris/Saturn,60s': #very specific time formatting for this one dataset that has unorthodox time format compared to the rest of the server
+            if randID == 'Cassini/Ephemeris/Saturn,60s' or randID == 'Cassini/MAG/VectorKSO': #very specific time formatting for these two datasets that has unorthodox time format compared to the rest of the server
                 startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S")
                 stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%d")
+                
+            
+                
+                
             else:
                 startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S")
                 stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%dT%H:%M")
@@ -296,17 +300,19 @@ def hapiTest(cHS):
             #load csv file from finalURL
             try:
                 
-                csvResponse = pd.read_csv(finalURL)
+                csvResponse = pd.read_csv(finalURL) #turns it into a pandas dataframe
             except:
                 
                 csvResponse = []
                 
+                csvResponse = pd.DataFrame(csvResponse) #makes into an empty dataframe to prevent errors
+                
 
             
-            dataRows = list(csvResponse) #this creates a measurebale length list from the _csv.reader object
+            dataRows = csvResponse.shape[0] #this returns the # of rows in the dataframe
             
             
-            if len(dataRows) < 1:
+            if dataRows < 2: #2 to avoid tick issue???
                 
                 print(f"{tColors.fail}No data found... increasing time range{tColors.endC}")
                 
@@ -336,7 +342,7 @@ def hapiTest(cHS):
                 
                    
     except Exception as e:
-        exceptLog.append(str(e) + " occured on " + cHS + " process:  loading CSV. Likely empty dataset")
+        exceptLog.append(str(e) + " occured on " + finalURL + " process:  loading CSV. Likely empty dataset")
         print(str(e))
     
         
@@ -379,7 +385,7 @@ def hapiTest(cHS):
 
     except Exception as e:
        
-        exceptLog.append(str(e) + " occured on " + cHS + " process:  plotting data")
+        exceptLog.append(str(e) + " occured on " + finalURL + " process:  plotting data")
         
         
         
