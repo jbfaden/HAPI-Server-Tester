@@ -87,7 +87,7 @@ def testHTTPCode(cS):
 #begin testing
 
 
-def hapiTest(cHS):
+def hapiTest(cHS,seed):
     
     #a way to measure process time
     start_time = time.perf_counter ()
@@ -111,7 +111,7 @@ def hapiTest(cHS):
         print("URL DOES NOT MATCH KNOWN HAPI SERVER")
         #sys.exit("URL DOES NOT MATCH KNOWN HAPI SERVER, TERMINATE PROCESS")
         
-    
+    random.seed(seed)
     
     #test HTTP code to check for 200 response
     testHTTPCode(cHS)
@@ -274,8 +274,8 @@ def hapiTest(cHS):
     
     testStopDate = stopDate.isoformat() + 'Z'
     
-    print(testStartDate)
-    print(testStopDate)
+    print('testStartDate=', testStartDate)
+    print('testStopDate=', testStopDate)
     
     
     #create the final random link- with a special case for 2.0 vs 3.0- & only to get CSVs!
@@ -325,7 +325,8 @@ def hapiTest(cHS):
                 
                 testStartDate = testDate.isoformat() + 'Z'
                 
-                
+                if ( testInterval > (1440*10) ):
+                    raise Exception("time interval too long")
                 
                 if testInterval == 3840: #64 hours in mins, if it reaches this point go straight to collecting a years worth of data
                     increaser = 300
@@ -420,9 +421,21 @@ def hapiTest(cHS):
 def main():
     
     test_start_time = time.perf_counter ()
-    
-    for z in servers:
-        hapiTest(z)
+
+    seed= 1
+
+    print('Running tests with seed %d' % ( seed ) )
+    random.seed(seed)
+
+    seeds= [0]* len(servers)
+    for i in range(len(servers)):
+        seeds[i]= random.randint(0,10000)
+
+    for i in range(len(servers)):
+        z= servers[i]
+        print('#################')
+        print('Running test with seed %d: %s' % ( seeds[i], z ) )
+        hapiTest(z,seeds[i])
     
     for o in finalLog:
         
