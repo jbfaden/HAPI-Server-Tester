@@ -422,7 +422,7 @@ def main():
     
     test_start_time = time.perf_counter ()
 
-    seed= 1
+    seed= random.randint(0,100000)
 
     print('Running tests with seed %d' % ( seed ) )
     random.seed(seed)
@@ -449,8 +449,14 @@ def main():
     
     #print all exceptions that occured for debugging purposes:
     
+    returnStatus=9
+
     for j in exceptLog:
         print(j)
+        returnStatus=1
+
+    sys.exit(returnStatus)
+
 main()
     
     
