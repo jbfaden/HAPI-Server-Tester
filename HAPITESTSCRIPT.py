@@ -40,6 +40,8 @@ from hapiplot import hapiplot
 
 
 
+USER_AGENT = 'hapibot-a'
+
 #declaring variables and defining functions
 
 finalLog = ['**********************************', 'RESULTS:']
@@ -66,7 +68,8 @@ class tColors:
 
 #tests the server for a 200 response code
 def testHTTPCode(cS):
-    x = requests.get(cS) #, verify=False)
+    headers= { "User-Agent" : USER_AGENT }
+    x = requests.get(cS,headers=headers) #, verify=False)
     
     if x.status_code == 200:
         print(f"{tColors.success}Server is up!{tColors.endC}")
@@ -86,7 +89,11 @@ def testHTTPCode(cS):
 
 #begin testing
 
-
+def myurlopen( url ):
+    headers = { 'User-Agent': USER_AGENT }
+    response = requests.get(url, headers=headers)
+    return response
+    
 def hapiTest(cHS,seed):
     
     #a way to measure process time
@@ -121,13 +128,14 @@ def hapiTest(cHS,seed):
     catalogURL = cHS
     catalogURL += '/catalog'
     
-    
     try:
     
         #load all available dataset ids and store them in a python list for further use
-            
-        serverResponse = urlopen(catalogURL)
-        DataSetList = json.loads(serverResponse.read())
+        print('url ' + catalogURL )
+        
+        print('line 136')
+        serverResponse = myurlopen(catalogURL)
+        DataSetList = json.loads(serverResponse.text)
         refinedList = DataSetList.get('catalog') #just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom. 
             
             #get HAPI version for later use
@@ -150,29 +158,27 @@ def hapiTest(cHS,seed):
         print(len(refinedList))
         
     except Exception as e:
-        
+        print('Exception!')
         exceptLog.append(str(e) + " occured on " + cHS + "  process: getting dataset IDs")
         
         
     #get a random dataset ID to choose time/params from the info
     
     randID = random.choice(idList)
-    print(randID)
+    print('randID:', randID)
     infoURL = cHS
     #create the info URL
     infoURL += '/info?id=' + randID
     
-    
-    
-    
     #make a list of all available parameters for said dataset (from info url) and choose a random one
-    
+        
     try:
     
         #load all available parameter ids and store them in a python list for further use
-            
-        serverResponse = urlopen(infoURL)
-        DataSetList = json.loads(serverResponse.read())
+        
+        print('url ' + infoURL )
+        serverResponse = myurlopen(infoURL)
+        DataSetList = json.loads(serverResponse.text)
         refinedList = DataSetList.get('parameters') #just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom. 
         #this actually returns a python list of python dictionaries... hence the .get of the key "name"
         #down below to get the parameter name
@@ -202,8 +208,9 @@ def hapiTest(cHS,seed):
     
     #search for the startDate and stopDate within a random dataset. 
     try:
-        serverResponse = urlopen(infoURL)
-        infoList = json.loads(serverResponse.read())
+        print('url ' + infoURL )    
+        serverResponse = myurlopen(infoURL)
+        infoList = json.loads(serverResponse.text)
         startDate = infoList.get('startDate')
         stopDate = infoList.get('stopDate')
         
@@ -276,8 +283,7 @@ def hapiTest(cHS,seed):
     
     print('testStartDate=', testStartDate)
     print('testStopDate=', testStopDate)
-    
-    
+        
     #create the final random link- with a special case for 2.0 vs 3.0- & only to get CSVs!
     dataEmpty = True #boolean for getting new urls until data has populated 
     testInterval = 60
@@ -300,8 +306,9 @@ def hapiTest(cHS,seed):
             
             #load csv file from finalURL
             try:
-                
-                csvResponse = pd.read_csv(finalURL) #turns it into a pandas dataframe
+                csvResponse = myurlopen(finalURL)
+                csvResponse = pd.DataFrame(csvResponse)
+                #csvResponse = pd.read_csv(finalURL) #turns it into a pandas dataframe
             except:
                 
                 csvResponse = []
@@ -339,7 +346,7 @@ def hapiTest(cHS,seed):
                 
                 
             else:
-                print(f"{tColors.success}Found Data! On to the plot!{tColors.endC}")
+                print(f"{tColors.success}Found Data! ")
                 dataEmpty = False
                 
                    
@@ -350,8 +357,12 @@ def hapiTest(cHS,seed):
         
     
         
+    do_plot = False
     
+    if not do_plot:
+        return
     
+    print( f"On to the plot!{tColors.endC}")
     
     #With the random link, check to see if the resulting CSV is parseable! 
     #and if the metadata allows for a good plot using Hapiplot!
@@ -368,11 +379,12 @@ def hapiTest(cHS,seed):
         start      = testStartDate
         stop       = testStopDate
         opts       = {'logging': True, 'usecache': True}
-            
+                                
         data, meta = hapi(server, dataset, parameters, start, stop, **opts)
             
             
         popts = {'useimagecache': False, 'logging': True, 'returnimage': True}
+                
             
         hapiplot(data, meta, **popts)
         # Plot parameter 
@@ -435,6 +447,7 @@ def main():
         z= servers[i]
         print('#################')
         print('Running test with seed %d: %s' % ( seeds[i], z ) )
+                
         hapiTest(z,seeds[i])
     
     for o in finalLog:
