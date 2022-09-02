@@ -40,7 +40,7 @@ from hapiplot import hapiplot
 
 
 
-USER_AGENT = 'hapibot-a'
+USER_AGENT = 'hapibot-a/1.0; https://github.com/hapi-server/data-specification/wiki/hapi-bots.md#hapibot-a'
 
 #declaring variables and defining functions
 
@@ -55,8 +55,15 @@ servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'http://lasp.colorado.edu/lisird/hapi',
  'http://hapi-server.org/servers/TestData2.0/hapi',
  'http://amda.irap.omp.eu/service/hapi', 
- 'https://vires.services/hapi'
+ 'https://vires.services/hapi',
+ 'https://jfaden.net/HapiServerDemo/hapi'
  ]
+ 
+#servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi'
+# ]
+ 
+
+ 
 
 #error/success color escape codes
 class tColors:
@@ -90,6 +97,7 @@ def testHTTPCode(cS):
 #begin testing
 
 def myurlopen( url ):
+    print('url ' + url )
     headers = { 'User-Agent': USER_AGENT }
     response = requests.get(url, headers=headers)
     return response
@@ -131,9 +139,7 @@ def hapiTest(cHS,seed):
     try:
     
         #load all available dataset ids and store them in a python list for further use
-        print('url ' + catalogURL )
         
-        print('line 136')
         serverResponse = myurlopen(catalogURL)
         DataSetList = json.loads(serverResponse.text)
         refinedList = DataSetList.get('catalog') #just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom. 
@@ -141,7 +147,7 @@ def hapiTest(cHS,seed):
             #get HAPI version for later use
         hapiVer = DataSetList.get('HAPI')
             
-        print(hapiVer)
+        print('hapiVer=',hapiVer)
             
             
             #this actually returns a python list of python dictionaries... hence the .get of the key "id"
@@ -153,9 +159,9 @@ def hapiTest(cHS,seed):
             idList.append(refinedList[i].get('id')) 
                     
                     
-        print(idList[0])
-        print(idList[-1])
-        print(len(refinedList))
+        print('first parameter: ',pList[0])
+        print('last parameter: ',pList[-1])
+        print('len(refinedList)=',len(refinedList))
         
     except Exception as e:
         print('Exception!')
@@ -165,7 +171,7 @@ def hapiTest(cHS,seed):
     #get a random dataset ID to choose time/params from the info
     
     randID = random.choice(idList)
-    print('randID:', randID)
+    print('randID=', randID)
     infoURL = cHS
     #create the info URL
     infoURL += '/info?id=' + randID
@@ -176,7 +182,6 @@ def hapiTest(cHS,seed):
     
         #load all available parameter ids and store them in a python list for further use
         
-        print('url ' + infoURL )
         serverResponse = myurlopen(infoURL)
         DataSetList = json.loads(serverResponse.text)
         refinedList = DataSetList.get('parameters') #just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom. 
@@ -189,9 +194,9 @@ def hapiTest(cHS,seed):
             pList.append(refinedList[i].get('name')) 
                 
                 
-        print(pList[0])
-        print(pList[-1])
-        print(len(refinedList))
+        print('first parameter: ',pList[0])
+        print('last parameter: ',pList[-1])
+        print('len(refinedList)=',len(refinedList))
         
     except Exception as e:
        
@@ -208,13 +213,12 @@ def hapiTest(cHS,seed):
     
     #search for the startDate and stopDate within a random dataset. 
     try:
-        print('url ' + infoURL )    
         serverResponse = myurlopen(infoURL)
         infoList = json.loads(serverResponse.text)
         startDate = infoList.get('startDate')
         stopDate = infoList.get('stopDate')
         
-        print(str(startDate) + '\n' +  str(stopDate))
+        print(str(startDate) + '/' +  str(stopDate))
         
         #convert the ISO 8061 strings to python datetime objects for later random date generation
         #with a special case for different servers that use microseconds and special case for DAS2 and HapiTestServer as they have odd time formats
@@ -253,7 +257,7 @@ def hapiTest(cHS,seed):
         k = 15
         testDate = stopDate - timedelta(minutes = k)
     
-        print(str(startDate) + '\n' +  str(testDate))
+        print(str(startDate) + '/' +  str(testDate))
     
     except Exception as e:
         
@@ -462,13 +466,10 @@ def main():
     
     #print all exceptions that occured for debugging purposes:
     
-    returnStatus=9
-
-    for j in exceptLog:
-        print(j)
-        returnStatus=1
-
-    sys.exit(returnStatus)
+    if len(exceptLog)<3:
+        sys.exit(0)
+    else:
+        sys.exit(1)
 
 main()
     
