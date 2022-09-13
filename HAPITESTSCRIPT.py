@@ -59,8 +59,7 @@ servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://jfaden.net/HapiServerDemo/hapi'
  ]
  
-#servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi'
-# ]
+servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
  
 
  
@@ -159,8 +158,8 @@ def hapiTest(cHS,seed):
             idList.append(refinedList[i].get('id')) 
                     
                     
-        print('first parameter: ',pList[0])
-        print('last parameter: ',pList[-1])
+        print('first parameter: ',idList[0])
+        print('last parameter: ',idList[-1])
         print('len(refinedList)=',len(refinedList))
         
     except Exception as e:
@@ -209,7 +208,7 @@ def hapiTest(cHS,seed):
     #get a random parameter
     del pList[0] #gets rid of time(no need to plot time)
     randPara = random.choice(pList)
-    print(randPara)
+    print('randPara=',randPara)
     
     #search for the startDate and stopDate within a random dataset. 
     try:
@@ -465,7 +464,14 @@ def main():
     print("Total Test Time: " + str(round((test_end_time - test_start_time), 3)) + " seconds")
     
     #print all exceptions that occured for debugging purposes:
-    
+    print( '== Exceptions ==' )
+    count = 0 
+    for s in exceptLog[2:]:
+       count = count + 1
+       print( " %02d: %s"  % ( count, s ) )
+    if count==0:
+       print( "(none)" )
+
     if len(exceptLog)<3:
         sys.exit(0)
     else:
