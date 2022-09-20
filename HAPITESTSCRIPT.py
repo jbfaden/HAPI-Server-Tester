@@ -59,7 +59,7 @@ servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://jfaden.net/HapiServerDemo/hapi'
  ]
  
-servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
+#servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
  
 
  
