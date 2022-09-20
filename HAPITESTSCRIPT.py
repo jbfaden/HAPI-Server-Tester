@@ -307,6 +307,9 @@ def hapiTest(cHS,seed):
                     
                 print(finalURL)
             
+            print( 'HAPI verifier URL:' )
+            print( 'https://hapi-server.org/verify/?url=%s&id=%s&parameter=%s&time.min=%s&time.max=%s' % ( cHS, randID, randPara, testStartDate, testStopDate ) )
+            
             #load csv file from finalURL
             try:
                 csvResponse = myurlopen(finalURL)
