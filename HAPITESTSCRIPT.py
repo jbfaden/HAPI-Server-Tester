@@ -438,16 +438,32 @@ def hapiTest(cHS,seed):
     
 def main():
     
+    if len(sys.argv)==2:
+        if sys.argv[1]=='--help':
+            print( 'Usage:\n  python HAPITESTSCRIPT.py [seed] [url]\n' )
+            exit(-1)
+        else:
+            seed= int(sys.argv[1])
+    if len(sys.argv)==3:
+        seed= int(sys.argv[1]) 
+        server= sys.argv[2]
+
+    else:
+        seed= random.randint(0,100000)    
+     
     test_start_time = time.perf_counter ()
 
-    seed= random.randint(0,100000)
+    if len(sys.argv)<3:
+        print('Running tests with seed %d' % ( seed ) )
+        random.seed(seed)
 
-    print('Running tests with seed %d' % ( seed ) )
-    random.seed(seed)
-
-    seeds= [0]* len(servers)
-    for i in range(len(servers)):
-        seeds[i]= random.randint(0,10000)
+        seeds= [0]* len(servers)
+        for i in range(len(servers)):
+            seeds[i]= random.randint(0,10000)
+    else:
+        print('Running one test on one server.')
+        seeds= [ seed ]
+        servers= [ server ]
 
     for i in range(len(servers)):
         z= servers[i]
