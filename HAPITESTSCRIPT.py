@@ -25,7 +25,7 @@ from hapiplot import hapiplot
 # set up special matplotlib plotting requirements
 
 
-
+ 
 
 
 
@@ -47,7 +47,7 @@ USER_AGENT = 'hapibot-a/1.0; https://github.com/hapi-server/data-specification/w
 finalLog = ['**********************************', 'RESULTS:']
 
 exceptLog = ['**********************************', 'ERRORS:']
-
+ 
 servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://cdaweb.gsfc.nasa.gov/hapi',
  'http://planet.physics.uiowa.edu/das/das2Server/hapi', 
@@ -58,7 +58,7 @@ servers    = ['http://hapi-server.org/servers/SSCWeb/hapi',
  'https://vires.services/hapi',
  'https://jfaden.net/HapiServerDemo/hapi'
  ]
- 
+
 #servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
  
 
@@ -124,7 +124,7 @@ def hapiTest(cHS,seed):
     else:
         print("URL DOES NOT MATCH KNOWN HAPI SERVER")
         #sys.exit("URL DOES NOT MATCH KNOWN HAPI SERVER, TERMINATE PROCESS")
-        
+
     random.seed(seed)
     
     #test HTTP code to check for 200 response
@@ -437,7 +437,9 @@ def hapiTest(cHS,seed):
 
     
 def main():
-    
+
+    global servers 
+
     if len(sys.argv)==2:
         if sys.argv[1]=='--help':
             print( 'Usage:\n  python HAPITESTSCRIPT.py [seed] [url]\n' )
