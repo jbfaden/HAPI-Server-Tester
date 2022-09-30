@@ -357,7 +357,7 @@ def hapiTest(cHS,seed):
                 
                    
     except Exception as e:
-        exceptLog.append(str(e) + " occured on " + finalURL + " process:  loading CSV. Likely empty dataset")
+        exceptLog.append( 'python3 HAPITESTSCRIPT.py '+str(seed)+' '+cHS + '\n' + str(e) + " occured on " + finalURL + " process:  loading CSV. Likely empty dataset")
         print(str(e))
     
         
