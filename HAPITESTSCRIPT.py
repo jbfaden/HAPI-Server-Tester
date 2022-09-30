@@ -439,6 +439,9 @@ def hapiTest(cHS,seed):
 def main():
 
     global servers 
+    
+    print( len(sys.argv), ' ***' )
+
 
     if len(sys.argv)==2:
         if sys.argv[1]=='--help':
@@ -446,10 +449,9 @@ def main():
             exit(-1)
         else:
             seed= int(sys.argv[1])
-    if len(sys.argv)==3:
+    elif len(sys.argv)==3:
         seed= int(sys.argv[1]) 
         server= sys.argv[2]
-
     else:
         seed= random.randint(0,100000)    
      
