@@ -441,6 +441,7 @@ def main():
     global servers 
     
     print( len(sys.argv), ' ***' )
+    sys.stdout.flush()
 
 
     if len(sys.argv)==2:
@@ -469,11 +470,13 @@ def main():
         seeds= [ seed ]
         servers= [ server ]
 
+    sys.stdout.flush()
     for i in range(len(servers)):
         z= servers[i]
         print('#################')
         print('Running test with seed %d: %s' % ( seeds[i], z ) )
-                
+        sys.stdout.flush()
+                    
         hapiTest(z,seeds[i])
     
     for o in finalLog:
