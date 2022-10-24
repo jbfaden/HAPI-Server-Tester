@@ -83,15 +83,7 @@ def testHTTPCode(cS):
     else:
         print(f"{tColors.fail}ERRROR, BAD HTTP response status code: {tColors.endC}" + "[" + str(x.status_code) + "]")
         
-
-
-    
-
-
-
-
-
-
+from TimeUtil import TimeUtil
 
 #begin testing
 
@@ -234,48 +226,24 @@ def hapiTest(cHS,seed):
         #convert the ISO 8061 strings to python datetime objects for later random date generation
         #with a special case for different servers that use microseconds and special case for DAS2 and HapiTestServer as they have odd time formats
         
-        if cHS == "http://hapi-server.org/servers/TestData2.0/hapi": #special case for Hapi test server
-            startDate = datetime.datetime.strptime(startDate,'%Y-%m-%dZ')
-            stopDate = datetime.datetime.strptime(stopDate,'%Y-%m-%dZ')
-            
-        elif cHS == "http://planet.physics.uiowa.edu/das/das2Server/hapi": #special case or Das2 server
-            
-            if randID == 'Cassini/Ephemeris/Saturn,60s' or randID == 'Cassini/MAG/VectorKSO': #very specific time formatting for these two datasets that has unorthodox time format compared to the rest of the server
-                startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S")
-                stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%d")
-                
-            
-                
-                
-            else:
-                startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S")
-                stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%dT%H:%M")
-            
-        
-        elif len(startDate) > 20: #special case for microseconds, checks the length of the ISO time string
-            
-            startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S.%fZ")
-            stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%dT%H:%M:%S.%fZ")
-            
-        
-            
-        else: #case for no microseconds
-            startDate = datetime.datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%SZ")
-            stopDate = datetime.datetime.strptime(stopDate, "%Y-%m-%dT%H:%M:%SZ")
-            
-
         if sampleStartDate==None:        
-            #generate a test "start date" 15 mins before the dataset stopdate, to check if the latest data is all good/parseable (therefore the rest of the data should be ok.) well, maybe...
+            pp = TimeUtil.parseISO8601Time(startDate)
+            startDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
+            pp = TimeUtil.parseISO8601Time(stopDate)
+            stopDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
+
+            #generate a test "start date" 15 mins before the dataset stopdate, to check if the latest data is all good/parseable 
+            #(therefore the rest of the data should be ok.) well, maybe...
             k = 15
             testStartDate= ( stopDate - timedelta(minutes = k) ).isoformat() + 'Z'
             testStopDate = stopDate.isoformat() + 'Z'
-            expandCount = 5 # TODO: 
         else:
-            testStartDate = sampleStartDate
-            testStopDate= sampleStopDate
-            expandCount = 0
-            
-        print(str(startDate) + '/' +  str(testStopDate))
+            pp = TimeUtil.parseISO8601Time(sampleStartDate)
+            testStartDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
+            pp = TimeUtil.parseISO8601Time(sampleStopDate)
+            testStopDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
+                    
+        print(str(testStartDate) + '/' +  str(testStopDate))
     
     except Exception as e:
         
@@ -313,13 +281,13 @@ def hapiTest(cHS,seed):
             if hapiVer == '3.0':
                         
                     
-                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + testStartDate + '&stop=' + testStopDate + '&format=csv' #'&include=header'
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + str(testStartDate) + '&stop=' + str(testStopDate) + '&format=csv' #'&include=header'
                     
                 print(finalURL)
                 sys.stdout.flush()
         
             if hapiVer == '2.0' or hapiVer == '1.1':
-                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + testStartDate + '&time.max=' + testStopDate + '&format=csv' #'&include=header'
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + str(testStartDate) + '&time.max=' + str(testStopDate) + '&format=csv' #'&include=header'
                     
                 print(finalURL)
             
@@ -350,14 +318,11 @@ def hapiTest(cHS,seed):
                 #1 second delay between requests- to not overwhelm servers
                 time.sleep(1)
                 
-                
-                testStopDate = stopDate - timedelta(minutes = testInterval)
-                
-                testStartDate = testStopDate.isoformat() + 'Z'
-                
+                                
                 if ( sampleStartDate!=None ):
                     raise Exception('no data found in sampleStartDate to sampleStopDate!')
-                    
+                                    
+                testStartDate= ( stopDate -  timedelta(minutes = testInterval) )
                 if ( testInterval > (1440*10) ):
                     raise Exception("time interval too long")
                 
@@ -376,6 +341,8 @@ def hapiTest(cHS,seed):
                 
                    
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         exceptLog.append( 'python3 HAPITESTSCRIPT.py '+str(seed)+' '+cHS + '\n' + str(e) + " occured on " + finalURL + " process:  loading CSV. Likely empty dataset")
         print(str(e))
     
