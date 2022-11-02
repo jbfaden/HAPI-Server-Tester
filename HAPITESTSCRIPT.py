@@ -239,36 +239,22 @@ def hapiTest(cHS,seed):
             testStopDate = stopDate.isoformat() + 'Z'
         else:
             pp = TimeUtil.parseISO8601Time(sampleStartDate)
-            testStartDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
+            testStartDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6]).isoformat() + 'Z'
+
             pp = TimeUtil.parseISO8601Time(sampleStopDate)
-            testStopDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6])
-                    
-        print(str(testStartDate) + '/' +  str(testStopDate))
+            testStopDate = datetime.datetime(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],pp[6]).isoformat() + 'Z'
+
+        print( testStartDate + '/' + testStopDate )
     
     except Exception as e:
         
         exceptLog.append(str(e) + " occured on " + cHS + " process:  getting timestamps")
-        
-        
+
     #using the start and stop date, select a random start and stop date within the timeframe for use in sampling (pd dataframe)
     
     
-    
-        
-        
-    
-        
-        
-    
-        
-    
-    
-    
-    
-    
-    
-    print('testStartDate=', testStartDate)
-    print('testStopDate=', testStopDate)
+    print('testStartDate=', testStartDate, type(testStartDate) )
+    print('testStopDate=', testStopDate, type(testStopDate) )
         
     #create the final random link- with a special case for 2.0 vs 3.0- & only to get CSVs!
     dataEmpty = True #boolean for getting new urls until data has populated 
@@ -281,13 +267,13 @@ def hapiTest(cHS,seed):
             if hapiVer == '3.0':
                         
                     
-                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + str(testStartDate) + '&stop=' + str(testStopDate) + '&format=csv' #'&include=header'
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + testStartDate + '&stop=' + testStopDate + '&format=csv' #'&include=header'
                     
                 print(finalURL)
                 sys.stdout.flush()
         
             if hapiVer == '2.0' or hapiVer == '1.1':
-                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + str(testStartDate) + '&time.max=' + str(testStopDate) + '&format=csv' #'&include=header'
+                finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + testStartDate + '&time.max=' + testStopDate + '&format=csv' #'&include=header'
                     
                 print(finalURL)
             
@@ -322,7 +308,8 @@ def hapiTest(cHS,seed):
                 if ( sampleStartDate!=None ):
                     raise Exception('no data found in sampleStartDate to sampleStopDate!')
                                     
-                testStartDate= ( stopDate -  timedelta(minutes = testInterval) )
+                testStartDate= ( stopDate -  timedelta(minutes = testInterval) ).isoformat() + 'Z'
+
                 if ( testInterval > (1440*10) ):
                     raise Exception("time interval too long")
                 
