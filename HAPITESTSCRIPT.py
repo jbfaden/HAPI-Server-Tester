@@ -30,9 +30,19 @@ servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
            'http://hapi-server.org/servers/TestData2.0/hapi',
            'http://amda.irap.omp.eu/service/hapi',
            'https://vires.services/hapi',
-           'https://jfaden.net/HapiServerDemo/hapi'
+           'https://cottagesystems.com/HapiServerDemo/hapi'
            ]
-
+           
+# serverseeds can be used to explicitly set a seed for a server
+serverseeds = [ 8124,
+                0, 
+                0,
+                0,
+                100, # 7543 empty data set
+                0,
+                0,
+                985, # 3627 empty data set
+                0 ]
 
 # servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
 
@@ -69,6 +79,9 @@ def myurlopen(url):
 
 
 def hapiTest(cHS, seed):
+    """run tests on the server with the given seed.  The seed is used to select datasets to plot, randomly picking a 
+    dataset for a given seed."""
+    
     # a way to measure process time
     start_time = time.perf_counter()
 
@@ -87,8 +100,11 @@ def hapiTest(cHS, seed):
         print("URL MATCHES KNOWN HAPI SERVER")
 
     else:
-        print("URL DOES NOT MATCH KNOWN HAPI SERVER")
-        # sys.exit("URL DOES NOT MATCH KNOWN HAPI SERVER, TERMINATE PROCESS")
+        if ( "%d: %s" % ( seed, cHS ) ) in servers:
+            print("URL MATCHES KNOWN HAPI SERVER")
+        else:
+            print("URL DOES NOT MATCH KNOWN HAPI SERVER")
+            sys.exit("URL DOES NOT MATCH KNOWN HAPI SERVER, TERMINATE PROCESS")
 
     random.seed(seed)
 
@@ -99,36 +115,30 @@ def hapiTest(cHS, seed):
     catalogURL = cHS
     catalogURL += '/catalog'
 
-    try:
+    # load all available dataset ids and store them in a python list for further use
 
-        # load all available dataset ids and store them in a python list for further use
-
-        serverResponse = myurlopen(catalogURL)
-        DataSetList = json.loads(serverResponse.text)
-        refinedList = DataSetList.get(
+    serverResponse = myurlopen(catalogURL)
+    DataSetList = json.loads(serverResponse.text)
+    refinedList = DataSetList.get(
             'catalog')  # just a note, hapi 2.0 has the 'catalog' key:value item at the top of the json, while 3.0 has it at the bottom.
 
-        # get HAPI version for later use
-        hapiVer = DataSetList.get('HAPI')
+    # get HAPI version for later use
+    hapiVer = DataSetList.get('HAPI')
 
-        print('hapiVer=', hapiVer)
+    print('hapiVer=', hapiVer)
 
-        # this actually returns a python list of python dictionaries... hence the .get of the key "id"
-        # down below to get its value
+    # this actually returns a python list of python dictionaries... hence the .get of the key "id"
+    # down below to get its value
 
-        idList = []
-        for i in range(len(refinedList)):
+    idList = []
+    for i in range(len(refinedList)):
             idList.append(refinedList[i].get('id'))
 
-        print('first parameter: ', idList[0])
-        print('last parameter: ', idList[-1])
-        print('len(refinedList)=', len(refinedList))
-        sys.stdout.flush()
+    print('first parameter: ', idList[0])
+    print('last parameter: ', idList[-1])
+    print('len(refinedList)=', len(refinedList))
+    sys.stdout.flush()
 
-    except Exception as e:
-        print('Exception!')
-        sys.stdout.flush()
-        exceptLog.append(str(e) + " occured on " + cHS + "  process: getting dataset IDs")
 
     # get a random dataset ID to choose time/params from the info
 
@@ -170,49 +180,46 @@ def hapiTest(cHS, seed):
     print('randPara=', randPara)
 
     # search for the startDate and stopDate within a random dataset.
-    try:
-        sys.stdout.flush()
 
-        serverResponse = myurlopen(infoURL)
-        infoList = json.loads(serverResponse.text)
-        startDate = infoList.get('startDate')
-        stopDate = infoList.get('stopDate')
+    sys.stdout.flush()
 
-        sampleStartDate = infoList.get('sampleStartDate')
-        sampleStopDate = infoList.get('sampleStopDate')
+    serverResponse = myurlopen(infoURL)
+    infoList = json.loads(serverResponse.text)
+    startDate = infoList.get('startDate')
+    stopDate = infoList.get('stopDate')
 
-        print(str(startDate) + '/' + str(stopDate))
-        if sampleStartDate != None:
+    sampleStartDate = infoList.get('sampleStartDate')
+    sampleStopDate = infoList.get('sampleStopDate')
+
+    print(str(startDate) + '/' + str(stopDate))
+    if sampleStartDate != None:
             print('sampleStartDate ' + str(sampleStartDate) + '/' + str(sampleStopDate))
-        else:
+    else:
             print('sampleStartDate not available')
 
         # convert the ISO 8061 strings to python datetime objects for later random date generation
         # with a special case for different servers that use microseconds and special case for DAS2 and HapiTestServer as they have odd time formats
 
-        if sampleStartDate == None:
+    if sampleStartDate == None:
             pp = TimeUtil.parseISO8601Time(startDate)
-            startDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6])
+            startDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000)
             pp = TimeUtil.parseISO8601Time(stopDate)
-            stopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6])
+            stopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000)
 
             # generate a test "start date" 15 mins before the dataset stopdate, to check if the latest data is all good/parseable
             # (therefore the rest of the data should be ok.) well, maybe...
             k = 15
             testStartDate = (stopDate - timedelta(minutes=k)).isoformat() + 'Z'
             testStopDate = stopDate.isoformat() + 'Z'
-        else:
+    else:
             pp = TimeUtil.parseISO8601Time(sampleStartDate)
-            testStartDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]).isoformat() + 'Z'
+            testStartDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000).isoformat() + 'Z'
 
             pp = TimeUtil.parseISO8601Time(sampleStopDate)
-            testStopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]).isoformat() + 'Z'
+            testStopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000).isoformat() + 'Z'
 
-        print(testStartDate + '/' + testStopDate)
+    print(testStartDate + '/' + testStopDate)
 
-    except Exception as e:
-
-        exceptLog.append(str(e) + " occured on " + cHS + " process:  getting timestamps")
 
     # using the start and stop date, select a random start and stop date within the timeframe for use in sampling (pd dataframe)
 
@@ -352,7 +359,7 @@ def hapiTest(cHS, seed):
 
 
 def main():
-    global servers
+    global servers, serverseeds
 
     print(len(sys.argv), ' ***')
     sys.stdout.flush()
@@ -377,7 +384,10 @@ def main():
 
         seeds = [0] * len(servers)
         for i in range(len(servers)):
-            seeds[i] = random.randint(0, 10000)
+            if serverseeds[i]>0:
+                 seeds[i]= serverseeds[i]
+            else:
+                 seeds[i] = random.randint(0, 10000)
     else:
         print('Running one test on one server.')
         seeds = [seed]
