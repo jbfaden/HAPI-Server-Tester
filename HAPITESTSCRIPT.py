@@ -23,7 +23,7 @@ finalLog = ['**********************************', 'RESULTS:']
 exceptLog = ['**********************************', 'ERRORS:']
 
 servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
-           'https://cdaweb.gsfc.nasa.gov/hapi',
+#           'https://cdaweb.gsfc.nasa.gov/hapi',
            'http://planet.physics.uiowa.edu/das/das2Server/hapi',
            'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
            'http://lasp.colorado.edu/lisird/hapi',
@@ -34,14 +34,14 @@ servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
            ]
            
 # serverseeds can be used to explicitly set a seed for a server
-serverseeds = [ 8124,
+serverseeds = [ 0,
                 0, 
                 0,
                 0,
-                100, # 7543 empty data set
+                0, # 7543 empty data set
                 0,
                 0,
-                985, # 3627 empty data set
+                0, # 3627 empty data set
                 0 ]
 
 # servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
@@ -206,17 +206,20 @@ def hapiTest(cHS, seed):
             pp = TimeUtil.parseISO8601Time(stopDate)
             stopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000)
 
-            # generate a test "start date" 15 mins before the dataset stopdate, to check if the latest data is all good/parseable
+            # generate a test "start date" 24 hours before the dataset stopdate, to check if the latest data is all good/parseable
             # (therefore the rest of the data should be ok.) well, maybe...
-            k = 15
-            testStartDate = (stopDate - timedelta(minutes=k)).isoformat() + 'Z'
+            k = 24
+            testStartDate = (stopDate - timedelta(hours=k)).isoformat() + 'Z'
             testStopDate = stopDate.isoformat() + 'Z'
+            increaser = 4  # willingness to increase the size to get data
     else:
             pp = TimeUtil.parseISO8601Time(sampleStartDate)
             testStartDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000).isoformat() + 'Z'
 
             pp = TimeUtil.parseISO8601Time(sampleStopDate)
             testStopDate = datetime.datetime(pp[0], pp[1], pp[2], pp[3], pp[4], pp[5], pp[6]//1000).isoformat() + 'Z'
+            
+            increaser = 0
 
     print(testStartDate + '/' + testStopDate)
 
@@ -229,7 +232,7 @@ def hapiTest(cHS, seed):
     # create the final random link- with a special case for 2.0 vs 3.0- & only to get CSVs!
     dataEmpty = True  # boolean for getting new urls until data has populated
     testInterval = 60
-    increaser = 4
+
     try:
 
         while dataEmpty:
@@ -254,41 +257,21 @@ def hapiTest(cHS, seed):
             try:
                 csvResponse = myurlopen(finalURL)
                 csvResponse = pd.DataFrame(csvResponse)
-                # csvResponse = pd.read_csv(finalURL) #turns it into a pandas dataframe
-            except:
 
-                csvResponse = []
+            except:
 
                 csvResponse = pd.DataFrame(csvResponse)  # makes into an empty dataframe to prevent errors
 
             dataRows = csvResponse.shape[0]  # this returns the # of rows in the dataframe
 
-            if dataRows < 2:  # 2 to avoid tick issue???
-
-                print(f"{tColors.fail}No data found... increasing time range{tColors.endC}")
-
-                # 1 second delay between requests- to not overwhelm servers
-                time.sleep(1)
-
-                if (sampleStartDate != None):
-                    raise Exception('no data found in sampleStartDate to sampleStopDate!')
-
-                testStartDate = (stopDate - timedelta(minutes=testInterval)).isoformat() + 'Z'
-
-                if (testInterval > (1440 * 10)):
-                    raise Exception("time interval too long")
-
-                if testInterval == 3840:  # 64 hours in mins, if it reaches this point go straight to collecting a years worth of data
-                    increaser = 300
-
-                # increase the time range by 4x each time, until data is found, if not the exception will catch an out of bounds HAPI error, most likely meaning empty data. 15 mins, 1 hr, 4hr, 16hr, 64hr
-                testInterval *= increaser
-
-
-
-
+            if dataRows < 2 and increaser==0:
+                print(f"{tColors.fail}No data found in sample time interval {tColors.endC} "+finalURL)
+                raise Exception("No data found in sample time interval")
+            elif dataRows < 2:
+                print(f"{tColors.success}Successful but response was empty, which is allowed because no sample time interval found. {tColors.endC} "+finalURL)
+                dataEmpty = False
             else:
-                print(f"{tColors.success}Found Data! ")
+                print(f"{tColors.success}Found Data!  {tColors.endC} "+finalURL)
                 dataEmpty = False
 
 
@@ -298,51 +281,6 @@ def hapiTest(cHS, seed):
         exceptLog.append('python3 HAPITESTSCRIPT.py ' + str(seed) + ' ' + cHS + '\n' + str(
             e) + " occured on " + finalURL + " process:  loading CSV. Likely empty dataset")
         print(str(e))
-
-    do_plot = False
-
-    if not do_plot:
-        return
-
-    print(f"On to the plot!{tColors.endC}")
-
-    # With the random link, check to see if the resulting CSV is parseable!
-    # and if the metadata allows for a good plot using Hapiplot!
-    # try:
-
-    try:
-
-        server = cHS
-        dataset = randID
-        parameters = randPara
-        start = testStartDate
-        stop = testStopDate
-        opts = {'logging': True, 'usecache': True}
-
-        data, meta = hapi(server, dataset, parameters, start, stop, **opts)
-
-        popts = {'useimagecache': False, 'logging': True, 'returnimage': True}
-
-        hapiplot(data, meta, **popts)
-        # Plot parameter 
-
-        end_time = time.perf_counter()
-
-        finalLog.append(cHS + ' plotted successfully.')
-        print(f"{tColors.success}Success!!!!!{tColors.endC}" + " Time: " + str(
-            round((end_time - start_time), 3)) + " seconds")
-        # sys.exit(0)
-
-    except Exception as e:
-
-        exceptLog.append(str(e) + " occured on " + finalURL + " process:  plotting data")
-
-        print(f"{tColors.fail}HAPI failed to plot on {tColors.endC}" + str(cHS))
-        finalLog.append(cHS + '--ERROR')
-
-
-# final notes: some sites have UTC Zulu as :XXX, some have it as .XXX
-# also hapi 2.0 uses time.min and time.max to stream data...
 
 
 """
