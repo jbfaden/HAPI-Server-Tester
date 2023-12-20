@@ -27,7 +27,7 @@ servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
 #           'http://planet.physics.uiowa.edu/das/das2Server/hapi',
            'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
            'http://lasp.colorado.edu/lisird/hapi',
-           'http://hapi-server.org/servers/TestData2.0/hapi',
+#           'http://hapi-server.org/servers/TestData2.0/hapi',
            'http://amda.irap.omp.eu/service/hapi',
            'https://vires.services/hapi',
            'https://cottagesystems.com/HapiServerDemo/hapi'
@@ -35,11 +35,9 @@ servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
            
 # serverseeds can be used to explicitly set a seed for a server
 serverseeds = [ 0,
-                0, 
                 0,
                 0,
                 0, # 7543 empty data set
-                0,
                 0,
                 0, # 3627 empty data set
                 0 ]
