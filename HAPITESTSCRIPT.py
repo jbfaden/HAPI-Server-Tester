@@ -24,7 +24,7 @@ exceptLog = ['**********************************', 'ERRORS:']
 
 servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
 #           'https://cdaweb.gsfc.nasa.gov/hapi',
-           'http://planet.physics.uiowa.edu/das/das2Server/hapi',
+#           'http://planet.physics.uiowa.edu/das/das2Server/hapi',
            'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
            'http://lasp.colorado.edu/lisird/hapi',
            'http://hapi-server.org/servers/TestData2.0/hapi',
