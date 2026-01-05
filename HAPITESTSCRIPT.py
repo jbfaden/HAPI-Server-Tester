@@ -26,14 +26,14 @@ servers = [
     'https://cdaweb.gsfc.nasa.gov/hapi', 
     'http://hapi-server.org/servers/SSCWeb/hapi',
     'https://amda.irap.omp.eu/service/hapi',
-    'https://csatools.esac.esa.int/HapiServer/hapi',
+#    'https://csatools.esac.esa.int/HapiServer/hapi',
     'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
     'https://vires.services/hapi',
     'https://imag-data.bgs.ac.uk/GIN_V1/hapi',
-    'https://supermag.jhuapl.edu/hapi',
-    'https://wdcapi.bgs.ac.uk/hapi',
-    'http://lasp.colorado.edu/lisird/hapi',
-    'https://hapi.spaceweather.knmi.nl/hapi',
+#    'https://supermag.jhuapl.edu/hapi',
+#    'https://wdcapi.bgs.ac.uk/hapi',
+#    'http://lasp.colorado.edu/lisird/hapi',
+#    'https://hapi.spaceweather.knmi.nl/hapi',
     'https://api.helioviewer.org/hapi/Helioviewer/hapi',
     'https://planet.physics.uiowa.edu/das/das2Server/hapi',
     'https://cottagesystems.com/HapiServerDemo/hapi',
@@ -55,21 +55,21 @@ servers = [
 serverseeds = [ 0,
                 0,
                 0,
-                0, # 7543 empty data set
+#                0, # 7543 empty data set
                 0,
                 0, # 3627 empty data set
                 0,
-                0,
-                0,
-                0,
-                0,
-                0,
+#                0,
+#                0,
+#                0,
+#                0,
                 0,
                 0,
                 0,
                 0
                  ]
 
+print( "servers=%d serverseeds=%d" % ( len(servers), len(serverseeds) ) )
 # servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
 
 
@@ -263,7 +263,7 @@ def hapiTest(cHS, seed):
 
         while dataEmpty:
 
-            if hapiVer == '3.0':
+            if hapiVer == '3.0' or hapiVer == '3.1' or hapiVer == '3.2' or hapiVer == '3.3':
                 finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&start=' + testStartDate + '&stop=' + testStopDate + '&format=csv'  # '&include=header'
 
                 print(finalURL)
