@@ -22,16 +22,34 @@ finalLog = ['**********************************', 'RESULTS:']
 
 exceptLog = ['**********************************', 'ERRORS:']
 
-servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
-#           'https://cdaweb.gsfc.nasa.gov/hapi',
-#           'http://planet.physics.uiowa.edu/das/das2Server/hapi',
-           'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
-           'http://lasp.colorado.edu/lisird/hapi',
-#           'http://hapi-server.org/servers/TestData2.0/hapi',
-           'http://amda.irap.omp.eu/service/hapi',
-           'https://vires.services/hapi',
-           'https://cottagesystems.com/HapiServerDemo/hapi'
-           ]
+servers = [ 
+    'https://cdaweb.gsfc.nasa.gov/hapi', 
+    'http://hapi-server.org/servers/SSCWeb/hapi',
+    'https://amda.irap.omp.eu/service/hapi',
+    'https://csatools.esac.esa.int/HapiServer/hapi',
+    'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
+    'https://vires.services/hapi',
+    'https://imag-data.bgs.ac.uk/GIN_V1/hapi',
+    'https://supermag.jhuapl.edu/hapi',
+    'https://wdcapi.bgs.ac.uk/hapi',
+    'http://lasp.colorado.edu/lisird/hapi',
+    'https://hapi.spaceweather.knmi.nl/hapi',
+    'https://api.helioviewer.org/hapi/Helioviewer/hapi',
+    'https://planet.physics.uiowa.edu/das/das2Server/hapi',
+    'https://cottagesystems.com/HapiServerDemo/hapi',
+    'https://cottagesystems.com/server/ct/hapi'    
+]
+
+#servers = ['http://hapi-server.org/servers/SSCWeb/hapi',
+##           'https://cdaweb.gsfc.nasa.gov/hapi',
+##           'http://planet.physics.uiowa.edu/das/das2Server/hapi',
+#           'https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi',
+#           'http://lasp.colorado.edu/lisird/hapi',
+##           'http://hapi-server.org/servers/TestData2.0/hapi',
+#           'http://amda.irap.omp.eu/service/hapi',
+#           'https://vires.services/hapi',
+#           'https://cottagesystems.com/HapiServerDemo/hapi'
+#           ]
            
 # serverseeds can be used to explicitly set a seed for a server
 serverseeds = [ 0,
@@ -40,7 +58,17 @@ serverseeds = [ 0,
                 0, # 7543 empty data set
                 0,
                 0, # 3627 empty data set
-                0 ]
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+                 ]
 
 # servers    = ['http://hapi-server.org/servers/SSCWeb/hapi','https://jfaden.net/HapiServerDemo/hapi' ]
 
