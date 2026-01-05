@@ -269,10 +269,12 @@ def hapiTest(cHS, seed):
                 print(finalURL)
                 sys.stdout.flush()
 
-            if hapiVer == '2.0' or hapiVer == '1.1':
+            elif hapiVer == '2.0' or hapiVer == '1.1':
                 finalURL = cHS + '/data?id=' + randID + '&parameters=' + randPara + '&time.min=' + testStartDate + '&time.max=' + testStopDate + '&format=csv'  # '&include=header'
 
                 print(finalURL)
+            else:
+                raise Exception('hapi version not supported: '+str(hapiVer))
 
             print('HAPI verifier URL:')
             print('https://hapi-server.org/verify/?url=%s&id=%s&parameter=%s&time.min=%s&time.max=%s' % (
